@@ -1,48 +1,118 @@
+import pandas as pd
+import numpy as np
+import re
+
 def load(path):
-	df = None
-	'''YOUR CODE HERE'''
+    df = pd.read_csv('TRAIN_balanced_ham_spam.csv')
 
-
-	'''END'''
-	return df
-
+    return df
 def prior(df):
-	ham_prior = 0
-	spam_prior =  0
-	'''YOUR CODE HERE'''
+    ham_prior = 0
+    spam_prior =  0
+    '''YOUR CODE HERE'''
+    for i in df['label_num']:
+        if i == 1:
+            spam_prior += 1
+        else:
+            ham_prior += 1
+            
+    total = ham_prior+ spam_prior
+    
+    spam_prior = spam_prior / total
+    ham_prior = ham_prior/ total 
 
-
-	'''END'''
-	return ham_prior, spam_prior
+    '''END'''
+    return ham_prior, spam_prior
 
 def likelihood(df):
-	ham_like_dict = {}
-	spam_like_dict = {}
-	'''YOUR CODE HERE'''
+    ham_like_dict = {}
+    spam_like_dict = {}
+    '''YOUR CODE HERE'''
+    
+    templist = []
+    templist2 = []
+    
+    df_list = df[['text','label_num']]
+    
+    spamset = set()
+    hamset = set()
+    
+    ham = df_list.loc[df['label_num'] == 0]
+    spam = df_list.loc[df['label_num'] == 1]
+ 
+    for email in spam.index:
+        templist = spam['text'][email].split()
+    for word in templist:
+        if word not in spamset:
+            spamset.add(word)
+    for word in spam_set:
+        if word not in spam_like_dict:
+            spam_like_dict[word] = 1
+        else:
+            spam_like_dict[word] +=1
+        
+    spamset.clear()
+    
 
-	'''END'''
+    for email in ham.index:
+        templist = ham['text'][email].split()
+    for word in templist2:
+        if word not in hamset:
+            hamset.add(word)
+    for word in ham_set:
+        if word not in ham_like_dict:
+            ham_like_dict[word] = 1
+        else:
+            ham_like_dict[word] +=1
+        
+    hamset.clear()
+    
+    
+    
+    '''END'''
 
-	return ham_like_dict, spam_like_dict
+    return ham_like_dict, spam_like_dict
+
 
 def predict(ham_prior, spam_prior, ham_like_dict, spam_like_dict, text):
-	'''
-	prediction function that uses prior and likelihood structure to compute proportional posterior for a single line of text
-	'''
-	#ham_spam_decision = 1 if classified as spam, 0 if classified as normal/ham
-	ham_spam_decision = None
+    '''
+    prediction function that uses prior and likelihood structure to compute proportional posterior for a single line of text
+    '''
+    #ham_spam_decision = 1 if classified as spam, 0 if classified as normal/ham
+    ham_spam_decision = None
 
 
 
 
-	'''YOUR CODE HERE'''
-	#ham_posterior = posterior probability that the email is normal/ham
-	ham_posterior = None
+    '''YOUR CODE HERE'''
+    #ham_posterior = posterior probability that the email is normal/ham
+    ham_posterior = None
 
-	#spam_posterior = posterior probability that the email is spam
-	spam_posterior = None
+    #spam_posterior = posterior probability that the email is spam
+    spam_posterior = None
 
-	'''END'''
-	return ham_spam_decision
+    '''END'''
+    wgivenspamspamtotal=1
+    wgivennotspamnotspamtotal=1
+    content = text.split()
+    
+    for word in content:
+        if word in spam_like_dict and word in ham_like_dict:
+            wgivenspamspam = spam_like_dict[word]/ max(spam_like_dict.values()) * spam_prior
+            wgivennotspamnotspam = ham_like_dict[word]/ max(ham_like_dict.values()) * ham_prior
+            wgivenspamspamtotal *= Decimal(wgivenspamspam)
+            wgivennotspamnotspamtotal *= Decimal(wgivennotspamnotspam)
+    
+    spam_posteriror = Decimal(wgivenspamspamtotal/ ((wgivenspamspamtotal + wgivennotspamnotspamtotal)))
+    ham_posteriror = Decimal(wgivennotspamnotspamtotal/ ((wgivenspamspamtotal + wgivennotspamnotspamtotal)))
+    
+    if spam_posterior> ham_posterior:
+        ham_spam_decision =1
+    else:
+        ham_spam_decision =0
+    
+    return ham_spam_decision
+
 
 
 def metrics(ham_prior, spam_prior, ham_dict, spam_dict, df):
